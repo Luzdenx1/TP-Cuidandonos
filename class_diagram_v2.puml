@@ -1,0 +1,148 @@
+@startuml
+
+class User {
+    firstName : String
+    lastName : String
+    address : Address
+    birthDate : LocalDate
+    gender : Gender
+    notifications : List<Notification>
+    receivedTrips : List<Trip>
+    assignedTrip : Trip
+    historicTrips : List<Trip>
+
+    + acceptTrip(Trip trip)
+    + rejectTrip(Trip trip)
+}
+
+class ActiveUser {
+    phone : Phone
+    shouldReceiveNotifications : boolean
+    incidentStrategy : IncidentStrategy
+    'Preguntar si request trip hace falta'
+    +requestTrip(Address originAddress, Address destinationAddress,
+                  ActiveUser transient, List<User> caretakers)
+}
+
+class Trip {
+    stops : List<TripStop>
+    transient : ActiveUser
+    caretakers : List<User>
+    stopStrategy : StopStrategy
+    status : TripStatus
+    +startTrip()
+    +finishTrip()
+    -executeIncidentStrategy()
+}
+
+class TripStop {
+    originAddress : Address
+    destinationAddress : Address
+    status : TripStatus
+    estimatedTime : LocalTime
+    distance : double
+    stopOrder : Integer
+
+    -calculateEstimatedTime()
+    -calculateDistance()
+}
+
+interface StopStrategy {
+    updateStatus()
+}
+
+class StopXMinutes {
+    minutes : Integer
+}
+
+class NotifyStopToStop {
+}
+
+interface IncidentStrategy {
+    execute()
+}
+
+class SendNotificationToCareTakers {
+    caretakers : List<User>
+    + SendNotificationToCareTakers(List<User> caretakers)
+}
+
+class CallPolice {
+    activeUser : ActiveUser
+    + CallPolice(ActiveUser activeUser)
+}
+
+class CallActiveUserPhone {
+    phone : Phone
+    + CallActiveUserPhone(Phone phone)
+}
+
+class WaitXMinutes {
+    minutes : Integer
+    + WaitXMinutes(Integer minutes)
+}
+
+
+class Notification {
+    type : NotificationType
+    message : String
+}
+
+class Phone {
+    countryCode : String
+    areaCode : String
+    number : String
+}
+
+class Address {
+    street : String
+    number : String
+    floor : String
+    apartment : String
+    postalCode : String
+}
+
+enum NotificationType {
+    WARNING
+    ERROR
+    INFO
+}
+
+enum Gender {
+    MALE
+    FEMALE
+    X
+}
+
+enum TripStatus {
+    REQUESTED
+    REJECTED
+    STARTED
+    FINISHED
+}
+
+User -- Gender
+User -- Address
+User -- Notification
+User --|> ActiveUser
+
+ActiveUser -- IncidentStrategy
+ActiveUser -- Phone
+
+IncidentStrategy -- SendNotificationToCareTakers
+IncidentStrategy -- CallPolice
+IncidentStrategy -- CallActiveUserPhone
+IncidentStrategy -- WaitXMinutes
+
+Trip -- User
+Trip -- Address
+Trip -- TripStatus
+Trip -- TripStop
+
+TripStop -- StopStrategy
+
+StopStrategy -- StopXMinutes
+StopStrategy -- NotifyStopToStop
+
+Notification -- NotificationType
+@enduml
