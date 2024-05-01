@@ -29,30 +29,38 @@ class Trip {
     transient : ActiveUser
     caretakers : List<User>
     stopStrategy : StopStrategy
-    status : TripStatus
+    status : TripStopStatus
     +startTrip()
     +finishTrip()
+    +calculateTotalEstimatedTime()
     -executeIncidentStrategy()
 }
 
 class TripStop {
     originAddress : Address
     destinationAddress : Address
-    status : TripStatus
+    status : TripStopStatus
     estimatedTime : LocalTime
     distance : double
     stopOrder : Integer
+    +startTripStop()
+    +finishTripStop()
+    -calculateEstimatedAndDistance()
+}
 
-    -calculateEstimatedTime()
-    -calculateDistance()
+enum TripStopStatus {
+  STARTED
+  FINISHED
 }
 
 interface StopStrategy {
-    updateStatus()
+    calculateStopsEstimatedTime(List<TripStop> stops) : List<Integer>
 }
 
 class StopXMinutes {
     minutes : Integer
+    
+    StopXMinutes(Integer minutes)
 }
 
 class NotifyStopToStop {
@@ -138,8 +146,7 @@ Trip -- User
 Trip -- Address
 Trip -- TripStatus
 Trip -- TripStop
-
-TripStop -- StopStrategy
+Trip -- StopStrategy
 
 StopStrategy -- StopXMinutes
 StopStrategy -- NotifyStopToStop
